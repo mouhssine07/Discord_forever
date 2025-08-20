@@ -47,5 +47,5 @@ client.on("ready", async () => {
 client.on("error", console.error);
 
 client.login(
-  "token"
+  "ODcxMTAwMjc1MDg2MjE3Mjk2.G-PLWA.yeN5DyGaWV7NpFA8ZVRMfT5_PtXybPgYvJOIcc"
 );
