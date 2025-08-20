@@ -8,44 +8,46 @@ const SERVER_ID = "1244273472792957022";
 const CHANNEL_ID = "1407779809127432385";
 
 client.on("ready", async () => {
-  console.log(`Client is ready! Logged in as ${client.user.tag}`);
-
+  console.log(`✅ Client is ready! Logged in as ${client.user.tag}`);
+  
   try {
     const server = client.guilds.cache.get(SERVER_ID);
     if (!server) {
-      console.log("Server not found");
+      console.log("❌ Server not found");
       return;
     }
 
     const voiceChannel = server.channels.cache.get(CHANNEL_ID);
-    if (!voiceChannel) {
-      console.log("Voice channel not found");
+    if (!voiceChannel || !voiceChannel.isVoiceBased()) {
+      console.log("❌ Voice channel not found");
       return;
     }
 
-    // Try the voice adapter directly
-    const voiceAdapter = client.voice;
-    if (!voiceAdapter || !voiceAdapter.joinChannel) {
-      console.log("Voice adapter not available");
-      return;
-    }
-
-    // Join the channel
-    const connection = await voiceAdapter.joinChannel(voiceChannel, {
+    const connection = await client.voice.joinChannel(voiceChannel, {
       selfDeaf: true,
       selfMute: false,
-      adapterCreator: server.voiceAdapterCreator,
+    });
+    
+    console.log(`🎵 Successfully joined: ${voiceChannel.name}`);
+    
+    connection.on('error', error => {
+      console.error('🔇 Voice error:', error);
+    });
+    
+    connection.on('disconnect', () => {
+      console.log('🔌 Disconnected from voice');
     });
 
-    console.log(`Joined voice channel: ${voiceChannel.name}`);
   } catch (error) {
-    console.log(`Error: ${error.message}`);
-    console.log("Full error:", error);
+    console.log(`❌ Error: ${error.message}`);
   }
+});
+
+client.on("disconnect", () => {
+  console.log("🔌 Bot disconnected");
 });
 
 client.on("error", console.error);
 
-client.login(
-  "ODcxMTAwMjc1MDg2MjE3Mjk2.G-PLWA.yeN5DyGaWV7NpFA8ZVRMfT5_PtXybPgYvJOIcc"
-);
+// Use environment variable for token
+client.login(process.env.DISCORD_TOKEN);
