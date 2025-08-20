@@ -1,3 +1,12 @@
+// Add compatibility shim at the very top
+if (typeof File === 'undefined') {
+  global.File = class File {
+    constructor() {
+      throw new Error('File class is not available in this environment');
+    }
+  };
+}
+
 const { Client } = require("discord.js-selfbot-v13");
 
 const client = new Client({
@@ -5,7 +14,7 @@ const client = new Client({
 });
 
 const SERVER_ID = "1244273472792957022";
-const CHANNEL_ID = "1407779809127432385";
+const CHANNEL_ID = "1407818644603408395";
 
 const TOKEN = process.env.DISCORD_TOKEN;
 
@@ -14,7 +23,7 @@ if (!TOKEN) {
   process.exit(1);
 }
 
-console.log("✅ Starting Discord voice bot on Railway...");
+console.log("✅ Starting Discord voice bot...");
 
 let connection = null;
 
@@ -32,7 +41,7 @@ async function joinVoiceChannel() {
       return;
     }
 
-    if (!['GUILD_VOICE', 'GUILD_STAGE_VOICE'].includes(voiceChannel.type)) {
+    if (voiceChannel.type !== 2 && voiceChannel.type !== 13) {
       console.log("❌ Channel is not a voice channel");
       return;
     }
@@ -55,7 +64,6 @@ async function joinVoiceChannel() {
 
   } catch (error) {
     console.log(`❌ Error joining voice: ${error.message}`);
-    console.log('🔄 Retrying in 10 seconds...');
     setTimeout(joinVoiceChannel, 10000);
   }
 }
@@ -73,7 +81,6 @@ client.on("error", error => {
   console.error("❌ Client error:", error.message);
 });
 
-// Auto-reconnect every hour
 setInterval(() => {
   console.log('🔄 Periodic reconnect...');
   if (connection) connection.destroy();
@@ -85,5 +92,4 @@ client.login(TOKEN).catch(error => {
   process.exit(1);
 });
 
-// Keep process alive
 setInterval(() => {}, 1000);
