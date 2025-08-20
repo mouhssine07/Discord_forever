@@ -14,7 +14,7 @@ const client = new Client({
 });
 
 const SERVER_ID = "1244273472792957022";
-const CHANNEL_ID = "1407818644603408395";
+const CHANNEL_ID = "1407818644603408395"; // Use the correct ID from debug
 
 const TOKEN = process.env.DISCORD_TOKEN;
 
@@ -32,48 +32,43 @@ async function joinVoiceChannel() {
     const server = client.guilds.cache.get(SERVER_ID);
     if (!server) {
       console.log("❌ Server not found");
-      console.log("Available servers:", client.guilds.cache.map(g => `${g.name} (${g.id})`));
       return;
     }
 
     const voiceChannel = server.channels.cache.get(CHANNEL_ID);
     if (!voiceChannel) {
       console.log("❌ Voice channel not found");
-      console.log("Available channels:", server.channels.cache.map(c => `${c.name} (${c.id}) - Type: ${c.type}`));
       return;
     }
 
-    // DEBUG: Check what type the channel actually is
     console.log(`Channel found: ${voiceChannel.name} (${voiceChannel.id})`);
     console.log(`Channel type: ${voiceChannel.type}`);
-    console.log(`Channel type number: ${typeof voiceChannel.type === 'number' ? voiceChannel.type : 'unknown'}`);
 
-    // Try to join regardless of type check (let Discord.js handle it)
-    try {
-      connection = await client.voice.joinChannel(voiceChannel, {
-        selfDeaf: true,
-        selfMute: false,
-      });
-
-      console.log(`🎵 Successfully joined voice channel: ${voiceChannel.name}`);
-      
-      connection.on('error', error => {
-        console.error('🔇 Voice error:', error.message);
-      });
-      
-      connection.on('disconnect', () => {
-        console.log('🔌 Disconnected, reconnecting in 5 seconds...');
-        setTimeout(joinVoiceChannel, 5000);
-      });
-
-    } catch (joinError) {
-      console.log(`❌ Failed to join channel: ${joinError.message}`);
-      console.log('🔄 Retrying in 10 seconds...');
-      setTimeout(joinVoiceChannel, 10000);
+    // FIXED: Use string comparison for channel type
+    if (voiceChannel.type !== 'GUILD_VOICE' && voiceChannel.type !== 'GUILD_STAGE_VOICE') {
+      console.log("❌ Channel is not a voice channel");
+      return;
     }
 
+    connection = await client.voice.joinChannel(voiceChannel, {
+      selfDeaf: true,
+      selfMute: false,
+    });
+
+    console.log(`🎵 Successfully joined voice channel: ${voiceChannel.name}`);
+    
+    connection.on('error', error => {
+      console.error('🔇 Voice error:', error.message);
+    });
+    
+    connection.on('disconnect', () => {
+      console.log('🔌 Disconnected, reconnecting in 5 seconds...');
+      setTimeout(joinVoiceChannel, 5000);
+    });
+
   } catch (error) {
-    console.log(`❌ Error: ${error.message}`);
+    console.log(`❌ Error joining voice: ${error.message}`);
+    console.log('🔄 Retrying in 10 seconds...');
     setTimeout(joinVoiceChannel, 10000);
   }
 }
