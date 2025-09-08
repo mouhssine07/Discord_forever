@@ -14,7 +14,7 @@ const client = new Client({
 });
 
 const SERVER_ID = "1244273472792957022";
-const CHANNEL_ID = "1407818644603408395"; // Use the correct ID from debug
+const CHANNEL_ID = "1414754766738817044"; // Use the correct ID from debug
 
 const TOKEN = process.env.DISCORD_TOKEN;
 
